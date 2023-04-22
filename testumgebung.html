@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test-Umgebung</title>
+  <script src="https://unpkg.com/vue@3.0.0/dist/vue.global.js"></script>
+  <script src="https://cdn.directus.io/sdk/js/latest/directus-sdk.js"></script>
+</head>
+<body>
+  <div id="app">
+    <ul>
+      <li v-for="collection in collections" :key="collection.id">{{ collection.name }}</li>
+    </ul>
+  </div>
+
+  <script type="module">
+    import { createApp } from 'vue';
+    import { useApi, useStores } from '@directus/extensions-sdk';
+
+    const app = createApp({
+      template: `
+        <div>
+          <ul>
+            <li v-for="collection in collections" :key="collection.id">{{ collection.name }}</li>
+          </ul>
+        </div>
+      `,
+
+      setup() {
+        const api = useApi();
+        const { useCollectionsStore } = useStores();
+        const collectionsStore = useCollectionsStore();
+
+        api.collections.read().then(response => {
+          collectionsStore.setCollections(response.data);
+        }).catch(error => {
+          console.error(error);
+        });
+
+        return {
+          collections: collectionsStore.collections,
+        };
+      },
+    });
+
+    app.mount('#app');
+  </script>
+</body>
+</html>
